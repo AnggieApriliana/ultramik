@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/10766/10766489.png">
-    <title>Monitoring Jarak menggunakan Ultrasonik
+    <title>Monitoring Jarak Ultrasonik</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -16,7 +16,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(120deg, #ff8cbc, #f1a9a0); /* Changed to a pink gradient */
+            background: linear-gradient(120deg, #FF6F91, #FFB6C1);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -174,38 +174,69 @@
 </head>
 <body>
     <div class="header">
-        <h1>Monitoring Suhu dan Kelembaban</h1>
-        <p>Real-time environmental monitoring system</p>
+        <h1>Monitoring Jarak Ultrasonik</h1>
+        <p>Real-time ultrasonic distance monitoring system</p>
     </div>
     
     <div class="container">
         <div class="box">
-            <i class="fas fa-temperature-high icon"></i>
-            <h2>Suhu</h2>
+            <i class="fas fa-ruler icon"></i>
+            <h2>Jarak</h2>
             <div class="display">
-                <span id="temperature" class="loading">--</span>°C
+                <span id="distance" class="loading">--</span> cm
             </div>
-            <div class="status" id="tempStatus">Mengukur...</div>
-        </div>
-
-        <div class="box">
-            <i class="fas fa-tint icon"></i>
-            <h2>Kelembaban</h2>
-            <div class="display">
-                <span id="humidity" class="loading">--</span>%
-            </div>
-            <div class="status" id="humidStatus">Mengukur...</div>
+            <div class="status" id="distStatus">Mengukur...</div>
         </div>
     </div>
 
     <div class="link">
         <a href="table.html">
-            <i class="fas fa-table"></i> Lihat Data Sensor Ultrasonik dengan Jarak
+            <i class="fas fa-table"></i> Lihat Semua Data
         </a>
     </div>
 
     <script>
-        // JavaScript remains the same
-    </script>
-</body>
-</html>
+        function updateSensorData() {
+            fetch('https://liwrsavpboulhslqxvui.supabase.co/rest/v1/ultrasonik', {
+                headers: {
+                    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpd3JzYXZwYm91bGhzbHF4dnVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2NDQ2ODcsImV4cCI6MjA0NzIyMDY4N30.ZUjUe3knWsoZIk4rE8ndZnDcv9cB7nah7PUz9ulZHYQ',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpd3JzYXZwYm91bGhzbHF4dnVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2NDQ2ODcsImV4cCI6MjA0NzIyMDY4N30.ZUjUe3knWsoZIk4rE8ndZnDcv9cB7nah7PUz9ulZHYQ'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                data.sort((a, b) => b.id - a.id);
+                const { jarak } = data[0];
+
+                // Update distance
+                const distElement = document.getElementById('distance');
+                distElement.textContent = jarak.toFixed(1);
+                distElement.classList.remove('loading');
+
+                // Update status messages
+                updateStatus('distStatus', jarak);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('distance').textContent = '--';
+                document.getElementById('distStatus').textContent = 'Error koneksi';
+            });
+        }
+
+        function updateStatus(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (value < 10) {
+                element.textContent = 'Sangat Dekat';
+                element.style.background = '#e74c3c';
+            } else if (value > 100) {
+                element.textContent = 'Jauh';
+                element.style.background = '#3498db';
+            } else {
+                element.textContent = 'Normal';
+                element.style.background = '#2ecc71';
+            }
+        }
+
+        setInterval(updateSensorData, 3000);
+        updateSensorData();
+    </script
